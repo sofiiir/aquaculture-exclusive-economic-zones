@@ -29,6 +29,7 @@ depth <- rast(here::here("data", "depth.tif"))
 
 
 ```{r}
+# 
 sst_2008 <- rast(here::here("data", "average_annual_sst_2008.tif"))
 sst_2009 <- rast(here::here("data", "average_annual_sst_2009.tif"))
 sst_2010 <- rast(here::here("data", "average_annual_sst_2010.tif"))
@@ -81,10 +82,24 @@ Resample to make sure that the resolution is the same.
 ```{r}
 # resample(depth, mean_sst)
 ```
-
+Now we can join the mean and the depths
 ```{r}
 # mean_sst , depth
 # c(mean_sst, depth)
 ```
+
+# Find cells where conditions are satisfied for both the sst and depth for specific species
+Create true false for each 
+1. Make a matrix
+2. Reclassify based on that matrix
+
+```{r}
+# likely want to change false and true to 0 and 1 
+# matrix = (-Inf , 11, FALSE, 
+#            11, 30, TRUE, 
+#            30, Inf, FALSE)
+
+```
+
 
 
