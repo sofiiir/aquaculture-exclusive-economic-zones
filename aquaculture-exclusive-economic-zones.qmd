@@ -1,0 +1,90 @@
+---
+title: "Aquaculture Exclusive Economic Zones"
+date: November 26, 2025
+author: "Sofia Rodas"
+format: html
+message: false
+warning: false
+---
+
+```{r}
+#|ouput: false
+
+# load in necessary libraries
+library(tidyverse)
+library(sf)
+library(terra)
+library(tmap)
+library(patchwork)
+```
+## Read in data 
+```{r}
+#| output: false
+
+wc_eez <- st_read(here::here("data","wc_regions_clean.shp"))
+```
+```{r}
+depth <- rast(here::here("data", "depth.tif"))
+```
+
+
+```{r}
+sst_2008 <- rast(here::here("data", "average_annual_sst_2008.tif"))
+sst_2009 <- rast(here::here("data", "average_annual_sst_2009.tif"))
+sst_2010 <- rast(here::here("data", "average_annual_sst_2010.tif"))
+sst_2011 <- rast(here::here("data", "average_annual_sst_2011.tif"))
+sst_2012 <- rast(here::here("data", "average_annual_sst_2012.tif"))
+
+# stack data
+sst <- c(sst_2008, sst_2009, sst_2010, sst_2011, sst_2012)
+```
+
+## Function to Check CRS 
+```{r}
+match_crs <- function(df1, df2){
+  if (st_crs(df1)==st_crs(df2)){
+  print("it's a match!")
+}else {
+    warning("still not a match")
+}}
+```
+
+```{r}
+match_crs(sst, wc_eez)
+```
+
+```{r}
+# for raster data to change crs
+# project(st_crs(sst))
+# for st data
+# st_transform(st_crs)
+```
+
+
+```{r}
+# to get the mean of the sst layers
+# mean(sst)
+# all of the cells are in kelvin (global function)
+# sst - 273 
+
+```
+
+To stack the sst with the depth we need to make sure the CRS, extent, and resolution.
+Crop to make sure the extent in the rasters are the same. 
+```{r}
+# need to have the same extent
+# crop the depth raster 
+# crop(depth, mean_sst)
+
+```
+Resample to make sure that the resolution is the same.
+```{r}
+# resample(depth, mean_sst)
+```
+
+```{r}
+# mean_sst , depth
+# c(mean_sst, depth)
+```
+
+
