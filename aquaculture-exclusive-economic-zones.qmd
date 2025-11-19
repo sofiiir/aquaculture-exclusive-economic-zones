@@ -21,69 +21,115 @@ library(patchwork)
 ```{r}
 #| output: false
 
-wc_eez <- st_read(here::here("data","wc_regions_clean.shp"))
+# consider vect
+eez <- vect(here::here("data","wc_regions_clean.shp"))
 ```
 ```{r}
+#| output: false
+# read in raster depth data
 depth <- rast(here::here("data", "depth.tif"))
 ```
 
 
 ```{r}
-# 
+#| output: false
+
+# read in raster sea surface temperature data
 sst_2008 <- rast(here::here("data", "average_annual_sst_2008.tif"))
 sst_2009 <- rast(here::here("data", "average_annual_sst_2009.tif"))
 sst_2010 <- rast(here::here("data", "average_annual_sst_2010.tif"))
 sst_2011 <- rast(here::here("data", "average_annual_sst_2011.tif"))
 sst_2012 <- rast(here::here("data", "average_annual_sst_2012.tif"))
 
-# stack data
+# stack data into a raster stack
 sst <- c(sst_2008, sst_2009, sst_2010, sst_2011, sst_2012)
 ```
 
-## Function to Check CRS 
+## Check CRS 
 Use crs for rasters and st_crs for sf objects.
-Keep the sst crs.
 ```{r}
-match_crs <- function(df1, df2){
-  if (crs(df1)==st_crs(df2)){
+#| warning: true
+
+  if (crs(sst)== crs(depth)){
   print("it's a match!")
 }else {
     warning("still not a match")
-}}
-```
+}
 
+ if (crs(sst)== crs(eez)){
+  print("it's a match!")
+}else {
+    warning("still not a match")
+}
+```
+Making all the CRS match the SST CRS.
 ```{r}
-match_crs(sst, wc_eez)
+depth <- project(depth, crs(sst))
+eez <- project(eez, crs(sst))
 ```
 
+Make sure the CRS transformation was successful.
 ```{r}
-# for raster data to change crs
-# project(st_crs(sst))
-# for st data
-# st_transform(st_crs)
+#| warning: true
+
+  if (crs(sst)== crs(depth)){
+  print("it's a match!")
+}else {
+    warning("still not a match")
+}
+
+ if (crs(sst) == crs(eez)){
+  print("it's a match!")
+}else {
+    warning("still not a match")
+}
 ```
 
+## Data processing
 
+This analysis works off the mean of SST measured between 2008 and 2012.
 ```{r}
-# to get the mean of the sst layers
-# mean(sst)
-# all of the cells are in kelvin (global function)
-# sst - 273 
+# calculate the mean of sst 
+sst <- mean(sst)
+# convert the units from kelvin to celcius
+sst <- sst - 273 
 
 ```
-
-To stack the sst with the depth we need to make sure the CRS, extent, and resolution.
+This analysis requires SST and depth to have the same extent, resolution, and positions.
 Crop to make sure the extent in the rasters are the same. 
 ```{r}
-# need to have the same extent
 # crop the depth raster 
-# crop(depth, mean_sst)
-
+depth <- crop(depth, sst)
 ```
-Resample to make sure that the resolution is the same.
+Resample to make sure that the resolutions are the same.
 ```{r}
-# resample(depth, mean_sst)
+depth <- resample(depth, sst)
 ```
+
+Make sure the extents match.
+```{r}
+#| warning: true
+
+  if (ext(sst)== ext(depth)){
+  print("extents match!")
+}else {
+    warning("extents not a match")
+}
+
+ 
+if (res(sst)[1]== res(depth)[1]){
+   print("resolution argument 1 is a match!")
+ }else {
+     warning("resolutions not a match")
+ }
+
+if (res(sst)[2]== res(depth)[2]){
+   print("resolution argument 2 is a match!")
+ }else {
+     warning("resolutions not a match")
+ }
+```
+
 Now we can join the mean and the depths
 ```{r}
 # mean_sst , depth
