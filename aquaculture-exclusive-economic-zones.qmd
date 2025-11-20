@@ -90,50 +90,50 @@ Make sure the CRS transformation was successful.
 This analysis works off the mean of SST measured between 2008 and 2012.
 ```{r}
 # calculate the mean of sst 
-sst <- mean(sst)
+mean_sst <- mean(sst)
 # convert the units from kelvin to celcius
-sst <- sst - 273 
+mean_sst <- mean_sst - 273 
 
 ```
 This analysis requires SST and depth to have the same extent, resolution, and positions.
 Crop to make sure the extent in the rasters are the same. 
 ```{r}
 # crop the depth raster 
-depth <- crop(depth, sst)
+depth <- crop(depth, mean_sst)
 ```
 Resample to make sure that the resolutions are the same.
 ```{r}
-depth <- resample(depth, sst)
+depth <- resample(depth, mean_sst)
 ```
 
 Make sure the extents match.
 ```{r}
 #| warning: true
 
-  if (ext(sst)== ext(depth)){
+  if (ext(mean_sst)== ext(depth)){
   print("extents match!")
 }else {
     warning("extents not a match")
 }
 
  
-if (res(sst)[1]== res(depth)[1]){
+if (res(mean_sst)[1]== res(depth)[1]){
    print("resolution argument 1 is a match!")
  }else {
      warning("resolutions not a match")
  }
 
-if (res(sst)[2]== res(depth)[2]){
+if (res(mean_sst)[2]== res(depth)[2]){
    print("resolution argument 2 is a match!")
  }else {
      warning("resolutions not a match")
  }
 ```
 
-Now we can join the mean and the depths
+Now we can join the mean SST and the depths.
 ```{r}
-# mean_sst , depth
-# c(mean_sst, depth)
+# MAYBE DO THIS AFTER ADDING THE TRUE FALSE 
+ocean_cond <- c(mean_sst, depth)
 ```
 
 # Find cells where conditions are satisfied for both the sst and depth for specific species
@@ -142,28 +142,30 @@ Create true false for each
 2. Reclassify based on that matrix
 
 ```{r}
-# likely want to change false and true to 0 and 1 
-# matrix = (-Inf , 11, FALSE, 
-#            11, 30, TRUE, 
-#            30, Inf, FALSE)
 
-```
+sst_matrix = (c(-Inf, 11, 0, 
+            11, 30, 1, 
+            30, Inf, 0))
 
-```{r}
-# classify (mean_sst, matrix)
+sst_classified <- classify(mean_sst, rcl = sst_matrix)
+
+sst_classified[is.nan(sst_classified)] <- NA
 ```
 
 Mean meters below sea level (-70 - 0). Note: double check no oysters are above sea level.
 ```{r}
-# zeros are false and 1 is true
-# matrix = (-Inf, -70, 0
-#           -70, 0, 1
-#           0, Inf, 0)
+depth_matrix = (c(-Inf, -70, 0,
+                  -70, 0, 1,
+                  0, Inf, 0))
+
+depth_classified <- classify(mean_sst, rcl = depth_matrix)
+
+depth_classified[is.nan(depth_classified)] <- NA
 ```
 
 We only want to keep where both of these are true. 
 ```{r}
-# depth * sst
+ocean_cond[(depth_classified * sst_classified) == 1]
 ```
 
 # We want to stay within Exclusive Economic Zones
