@@ -133,12 +133,6 @@ if (res(mean_sst)[2]== res(depth)[2]){
  }
 ```
 
-Now we can join the mean SST and the depths.
-```{r}
-# MAYBE DO THIS AFTER ADDING THE TRUE FALSE 
-ocean_cond <- c(mean_sst, depth)
-```
-
 # Find cells where conditions are satisfied for both the sst and depth for specific species
 Create true false for each 
 1. Make a matrix
@@ -154,8 +148,6 @@ sst_matrix <- matrix(c(-Inf, 11, 0,
 
 # classify where suitable sst habitat for oysters are
 sst_classified <- classify(mean_sst, rcl = sst_matrix)
-
-#sst_true <- mean_sst[sst_classified == 1]
 ```
 
 Mean meters below sea level (-70 - 0). 
@@ -170,10 +162,6 @@ depth_matrix = matrix(c(-Inf, -70, 0,
 depth_classified <- classify(depth, rcl = depth_matrix)
 ```
 
-We only want to keep where both of these are true. 
-```{r}
-ocean_cond[(depth_classified * sst_classified) == 1]
-```
 Create a function to determine what locations are suited for oyster aquaculture based on both sea surface temperature and depth.
 ```{r}
 suitable_habitat <- function(rast1, rast2){
@@ -184,12 +172,25 @@ suitable_habitat <- function(rast1, rast2){
 ```
 
 ```{r}
-oyster_eez <- lapp(c(sst_classified, depth_classified), fun = suitable_habitat)
+suit_oyster_aqu <- lapp(c(sst_classified, depth_classified), fun = suitable_habitat)
 ```
 
 ```{r}
-tm_shape(depth_classified)+
-  tm_raster()
+# adequate depth for oyster aquaculture
+tm_shape(sst_classified) +
+  tm_raster() + 
+  tm_title(text = "Adequate Sea Surface Temperatures for Oyster Aquaculture")
+
+# adequate depth for oyster aquaculture
+tm_shape(depth_classified) +
+  tm_raster() + 
+  tm_title(text = "Adequate Depths for Oyster Aquaculture")
+
+# adequate locations for oyster aquaculture
+tm_shape(suit_oyster_aqu) +
+  tm_raster(col.scale = tm_scale_continuous(values = "Blues")) + 
+  tm_title(text = "Adequate Locations for Oyster Aquaculture based on bathymetry and sea surface temperature") 
+#tm_layout(legend.show = FALSE)
 ```
 
 # We want to stay within Exclusive Economic Zones
