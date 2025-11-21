@@ -155,9 +155,10 @@ sst_matrix <- matrix(c(-Inf, 11, 0,
 # classify where suitable sst habitat for oysters are
 sst_classified <- classify(mean_sst, rcl = sst_matrix)
 
+#sst_true <- mean_sst[sst_classified == 1]
 ```
 
-Mean meters below sea level (-70 - 0). Note: double check no oysters are above sea level.
+Mean meters below sea level (-70 - 0). 
 ```{r}
 # create a classification matrix for depth
 depth_matrix = matrix(c(-Inf, -70, 0,
@@ -166,7 +167,7 @@ depth_matrix = matrix(c(-Inf, -70, 0,
                   ncol = 3, byrow = TRUE)
 
 # classify where suitable depth habitat for oysters are
-depth_classified <- classify(mean_sst, rcl = depth_matrix)
+depth_classified <- classify(depth, rcl = depth_matrix)
 ```
 
 We only want to keep where both of these are true. 
@@ -183,11 +184,11 @@ suitable_habitat <- function(rast1, rast2){
 ```
 
 ```{r}
-oyster_eez <- lapp(sst_classified, depth_classified, fun = suitable_habitat)
+oyster_eez <- lapp(c(sst_classified, depth_classified), fun = suitable_habitat)
 ```
 
 ```{r}
-tm_shape(sst_classified)+
+tm_shape(depth_classified)+
   tm_raster()
 ```
 
@@ -206,6 +207,7 @@ Count the cells. Number of cells that equal 1 times the cellsize() = total area 
 
 ```{r}
 # number of cells that equal 1 * cellsize() = total area that is suitable
+# expanse WOULD NEED TO MAKE THINGS NA 
 ```
 
 # Writing a function
