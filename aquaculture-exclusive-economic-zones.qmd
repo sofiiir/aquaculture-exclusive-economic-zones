@@ -196,7 +196,9 @@ tm_shape(suit_oyster_aqu) +
 # We want to stay within Exclusive Economic Zones
 We want to mask with the eez
 ```{r}
-# mask(rcl, eez)
+eez_oysters <- mask(suit_oyster_aqu, eez)
+
+eez_oysters[eez_oysters == 0] <- NA
 ```
 Then join the reclassified with the eez to get a dataframe with value, eez, x, y.
 Count the cells. Number of cells that equal 1 times the cellsize() = total area that is suitable. 
@@ -204,11 +206,15 @@ Count the cells. Number of cells that equal 1 times the cellsize() = total area 
 ```{r}
 # zones = region
 # summary = count()
+
+oyster_aquaculture <- zonal(eez_oysters, eez, fun = 'notNA')
 ```
 
 ```{r}
 # number of cells that equal 1 * cellsize() = total area that is suitable
 # expanse WOULD NEED TO MAKE THINGS NA 
+
+cellSize(eez_oysters)
 ```
 
 # Writing a function
