@@ -21,7 +21,7 @@ library(patchwork)
 ```{r}
 #| output: false
 
-# consider vect
+# read in exclusive economic zones vector data
 eez <- vect(here::here("data","wc_regions_clean.shp"))
 ```
 ```{r}
@@ -43,6 +43,10 @@ sst_2012 <- rast(here::here("data", "average_annual_sst_2012.tif"))
 
 # stack data into a raster stack
 sst <- c(sst_2008, sst_2009, sst_2010, sst_2011, sst_2012)
+```
+```{r}
+# remove unnecessary raster data
+rm(sst_2008, sst_2009, sst_2010, sst_2011, sst_2012)
 ```
 
 ## Check CRS 
@@ -93,7 +97,6 @@ This analysis works off the mean of SST measured between 2008 and 2012.
 mean_sst <- mean(sst)
 # convert the units from kelvin to celcius
 mean_sst <- mean_sst - 273 
-
 ```
 This analysis requires SST and depth to have the same extent, resolution, and positions.
 Crop to make sure the extent in the rasters are the same. 
@@ -141,31 +144,51 @@ Create true false for each
 1. Make a matrix
 2. Reclassify based on that matrix
 
+Sea surface temperature is adequate for oysters in the range of 11-30°C. Classify sea surface temperature for those that are adequate.
 ```{r}
-
-sst_matrix = (c(-Inf, 11, 0, 
+# create a classification matrix for sst
+sst_matrix <- matrix(c(-Inf, 11, 0, 
             11, 30, 1, 
-            30, Inf, 0))
+            30, Inf, 0),
+            ncol = 3, byrow = TRUE)
 
+# classify where suitable sst habitat for oysters are
 sst_classified <- classify(mean_sst, rcl = sst_matrix)
 
-sst_classified[is.nan(sst_classified)] <- NA
 ```
 
 Mean meters below sea level (-70 - 0). Note: double check no oysters are above sea level.
 ```{r}
-depth_matrix = (c(-Inf, -70, 0,
+# create a classification matrix for depth
+depth_matrix = matrix(c(-Inf, -70, 0,
                   -70, 0, 1,
-                  0, Inf, 0))
+                  0, Inf, 0),
+                  ncol = 3, byrow = TRUE)
 
+# classify where suitable depth habitat for oysters are
 depth_classified <- classify(mean_sst, rcl = depth_matrix)
-
-depth_classified[is.nan(depth_classified)] <- NA
 ```
 
 We only want to keep where both of these are true. 
 ```{r}
 ocean_cond[(depth_classified * sst_classified) == 1]
+```
+Create a function to determine what locations are suited for oyster aquaculture based on both sea surface temperature and depth.
+```{r}
+suitable_habitat <- function(rast1, rast2){
+  
+  rast1 * rast2
+  
+}
+```
+
+```{r}
+oyster_eez <- lapp(sst_classified, depth_classified, fun = suitable_habitat)
+```
+
+```{r}
+tm_shape(sst_classified)+
+  tm_raster()
 ```
 
 # We want to stay within Exclusive Economic Zones
