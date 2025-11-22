@@ -16,6 +16,7 @@ library(sf)
 library(terra)
 library(tmap)
 library(patchwork)
+library(kableExtra)
 ```
 ## Read in data 
 ```{r}
@@ -225,6 +226,14 @@ tm_shape(eez) +
   tm_shape(eez_oysters) + 
   tm_raster()
 
+```
+```{r}
+# create a table with the counts of adequate aquaculture zones 
+oyster_aquaculture |> 
+  relocate(region, .before = lyr1) |> 
+  rename(counts = lyr1) |> 
+  kbl(caption = "West Coast regions Exclusive Economic Zones (EEZ).") |> 
+  kable_styling() 
 ```
 
 # Writing a function
