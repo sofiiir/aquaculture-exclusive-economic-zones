@@ -207,7 +207,8 @@ Count the cells. Number of cells that equal 1 times the cellsize() = total area 
 # zones = region
 # summary = count()
 
-oyster_aquaculture <- zonal(eez_oysters, eez, fun = 'notNA')
+oyster_aquaculture <- zonal(eez_oysters, eez, fun = 'notNA') |> 
+  mutate(region = eez$rgn)
 ```
 
 ```{r}
@@ -215,6 +216,15 @@ oyster_aquaculture <- zonal(eez_oysters, eez, fun = 'notNA')
 # expanse WOULD NEED TO MAKE THINGS NA 
 
 cellSize(eez_oysters)
+```
+```{r}
+
+tm_shape(eez) +
+  tm_polygons(col = "rgn",
+              palette = "YlGn") +
+  tm_shape(eez_oysters) + 
+  tm_raster()
+
 ```
 
 # Writing a function
