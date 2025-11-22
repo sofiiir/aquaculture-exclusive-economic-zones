@@ -222,3 +222,26 @@ cellSize(eez_oysters)
 #function (min_sst, max_sst, min_depth, max_depth)
 ```
 
+# Additional species of interest: **Red Sea Urchin**, *Mesocentrotus franciscanus*
+```{r}
+# create a classification matrix for sst
+urch_sst_matrix <- matrix(c(-Inf, 6.75, 0, 
+            6.75, 13.02, 1, 
+            13.02, Inf, 0),
+            ncol = 3, byrow = TRUE)
+
+# classify where suitable sst habitat for oysters are
+urch_sst_classified <- classify(mean_sst, rcl = urch_sst_matrix)
+```
+
+```{r}
+# create a classification matrix for depth
+urch_depth_matrix = matrix(c(-Inf, -125, 0,
+                  -125, 0, 1,
+                  0, Inf, 0),
+                  ncol = 3, byrow = TRUE)
+
+# classify where suitable depth habitat for oysters are
+urch_depth_classified <- classify(depth, rcl = urch_depth_matrix)
+```
+
