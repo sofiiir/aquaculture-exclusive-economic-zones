@@ -70,7 +70,7 @@ Use crs for rasters and st_crs for sf objects.
     warning("still not a match")
 }
 
- if (st_crs(sst) == st_crs(eez_sf)){
+ if (crs(sst) == st_crs(eez_sf)){
   print("it's a match!")
 }else {
     warning("still not a match")
@@ -101,7 +101,7 @@ Make sure the CRS transformation was successful.
     warning("still not a match")
 }
 
- if (st_crs(sst) == st_crs(eez_sf)){
+ if (crs(sst) == st_crs(eez_sf)){
   print("it's a match!")
 }else {
     warning("still not a match")
@@ -227,8 +227,11 @@ Count the cells. Number of cells that equal 1 times the cellsize() = total area 
 # zones = region
 # summary = count()
 
-oyster_aquaculture <- zonal(eez_oysters, eez, fun = 'notNA') |> 
-  mutate(region = eez$rgn)
+oyst_count <- zonal(suit_oyster_aqu, eez_oysters, fun = "sum") |> 
+  as.data.frame()
+
+# oyster_aquaculture <- zonal(eez_oysters, eez_rast, fun = 'notNA') |> 
+#   mutate(region = eez$rgn)
 
 total_oyst <- expanse(eez_oysters)
 ```
@@ -252,21 +255,40 @@ zonal_area <- zonal(avg_area, eez_oysters, fun = "sum") |>
 ```
 
 ```{r}
+eez_sf <-  left_join(eez_sf, oyst_count, by = "rgn_id")
+eez_sf <-  left_join(eez_sf, zonal_area, by = "rgn_id")
+```
+
+
+```{r}
+# tm_basemap("Esri.OceanBasemap") +
+# tm_shape(eez_rast) +
+#   tm_raster(col  = tm_vars("rgn"),
+#               col.scale = tm_scale(values = (c("#7FB7BE",
+#                                                 "#D3F3EE",
+#                                                 "#5E6472",
+#                                                 "#065A82",
+#                                                 "#1F1A38"))),
+#               fill.legend = tm_legend("West Coast EEZ Regions")) +
+#   tm_shape(suit_oyster_aqu) + 
+#   tm_raster(col.scale = tm_scale_categorical(labels = (c("Suitable Areas", "Unsuitable")),
+#                                           values= (c("red", "white"))),
+#             col.legend = tm_legend("Aquaculture Areas"))
+
+```
+```{r}
 tm_basemap("Esri.OceanBasemap") +
-tm_shape(eez) +
-  tm_polygons(fill = "rgn",
-              fill.scale = tm_scale(values = (c("#7FB7BE",
-                                                "#D3F3EE",
-                                                "#5E6472",
-                                                "#065A82",
-                                                "#1F1A38"))),
-              fill.legend = tm_legend("West Coast EEZ Regions")) +
-  tm_shape(eez_oysters) + 
+tm_shape(eez_sf) +
+  tm_polygons( fill = 'area',
+              fill.legend = tm_legend("Suitable Aquaculture Area")) +
+  tm_shape(suit_oyster_aqu) + 
   tm_raster(col.scale = tm_scale_categorical(labels = (c("Suitable Areas", "Unsuitable")),
                                           values= (c("red", "white"))),
             col.legend = tm_legend("Aquaculture Areas"))
 
 ```
+
+
 ```{r}
 # regions <- c("Oregon", "Northern California", "Central California", "Southern California", "Washington")
 # 
