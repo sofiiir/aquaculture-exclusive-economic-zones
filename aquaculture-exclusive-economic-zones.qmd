@@ -64,22 +64,16 @@ Use crs for rasters and st_crs for sf objects.
     warning("still not a match")
 }
 
- if (crs(sst)== crs(eez)){
-  print("it's a match!")
-}else {
-    warning("still not a match")
-}
-
- if (crs(sst) == st_crs(eez_sf)){
-  print("it's a match!")
-}else {
-    warning("still not a match")
+#  if (crs(sst)== crs(eez)){
+#   print("it's a match!")
+# }else {
+#     warning("still not a match")
 }
 ```
 Making all the CRS match the SST CRS.
 ```{r}
 depth <- project(depth, crs(sst))
-eez <- project(eez, crs(sst))
+# eez <- project(eez, crs(sst))
 
 st_crs(eez_sf) <- crs(sst)
 # eez_sf <- st_transform(eez_sf, crs(sst))
@@ -95,17 +89,11 @@ Make sure the CRS transformation was successful.
     warning("still not a match")
 }
 
- if (crs(sst) == crs(eez)){
-  print("it's a match!")
-}else {
-    warning("still not a match")
-}
-
- if (crs(sst) == st_crs(eez_sf)){
-  print("it's a match!")
-}else {
-    warning("still not a match")
-}
+#  if (crs(sst) == crs(eez)){
+#   print("it's a match!")
+# }else {
+#     warning("still not a match")
+# }
 ```
 
 ## Data processing
@@ -214,10 +202,13 @@ tm_shape(suit_oyster_aqu) +
 # We want to stay within Exclusive Economic Zones
 We want to mask with the eez
 ```{r}
+# rasterize the eez sf object
 eez_rast <- rasterize(eez_sf, suit_oyster_aqu, field = "rgn_id")
 
+# set any locations with a zero to NA
 suit_oyster_aqu[suit_oyster_aqu == 0] <- NA
 
+# select only locations in the eez raster suitable for oyster aquaculture
 eez_oysters <- mask(eez_rast, suit_oyster_aqu)
 ```
 Then join the reclassified with the eez to get a dataframe with value, eez, x, y.
@@ -227,6 +218,7 @@ Count the cells. Number of cells that equal 1 times the cellsize() = total area 
 # zones = region
 # summary = count()
 
+# sum the suitable aquaculture locations based on eez zones
 oyst_count <- zonal(suit_oyster_aqu, eez_oysters, fun = "sum") |> 
   as.data.frame()
 
@@ -249,12 +241,14 @@ avg_area <- cellSize(eez_oysters, unit = "km")
 # area <- (oyster_aquaculture$lyr1 * avg_area) |> 
 #   as.data.frame()
 
+# sum the total area of suitable aquaculture based on eez zones
 zonal_area <- zonal(avg_area, eez_oysters, fun = "sum") |>
   as.data.frame()
   
 ```
 
 ```{r}
+# join to make one data frame with the counts and the total area
 eez_sf <-  left_join(eez_sf, oyst_count, by = "rgn_id")
 eez_sf <-  left_join(eez_sf, zonal_area, by = "rgn_id")
 ```
@@ -339,17 +333,99 @@ tm_shape(eez_sf) +
 
 ```{r}
 # create a table with the counts of adequate aquaculture zones 
-oyster_aquaculture |> 
-  relocate(region, .before = lyr1) |> 
-  rename(counts = lyr1) |> 
-  kbl(caption = "West Coast regions Exclusive Economic Zones (EEZ).") |> 
-  kable_styling() 
+# oyster_aquaculture |> 
+#   relocate(region, .before = lyr1) |> 
+#   rename(counts = lyr1) |> 
+#   kbl(caption = "West Coast regions Exclusive Economic Zones (EEZ).") |> 
+#   kable_styling() 
 ```
 
 # Writing a function
 ```{r}
-#function (min_sst, max_sst, min_depth, max_depth)
+potent_aqu <- function (sst, eez_sf, depth, min_sst, max_sst, min_depth, max_depth){
+
+# make all of the CRS match
+depth <- project(depth, crs(sst))
+st_crs(eez_sf) <- crs(sst)
+
+# calculate the mean of sst 
+mean_sst <- mean(sst)
+# convert the units from kelvin to celcius
+mean_sst <- mean_sst - 273 
+
+# crop the depth raster to match the sst extent
+depth <- crop(depth, mean_sst)
+
+# resample depth raster to match the sst resolution
+depth <- resample(depth, mean_sst)
+
+# create a classification matrix for sst
+sst_matrix <- matrix(c(-Inf, min_sst, 0, 
+            min_sst, max_sst, 1, 
+            max_sst, Inf, 0),
+            ncol = 3, byrow = TRUE)
+
+# classify where suitable sst habitat for oysters are
+sst_classified <- classify(mean_sst, rcl = sst_matrix)
+
+# create a classification matrix for depth
+depth_matrix = matrix(c(-Inf, min_depth, 0,
+                  min_depth, max_depth, 1,
+                  max_depth, Inf, 0),
+                  ncol = 3, byrow = TRUE)
+
+# classify where suitable depth habitat for oysters are
+depth_classified <- classify(depth, rcl = depth_matrix)
+
+# function to determine what habitats are suitable 
+suitable_habitat <- function(rast1, rast2){
+
+  rast1 * rast2
+}
+
+# find suitable locations for aquaculture
+suit_aqu <- lapp(c(sst_classified, depth_classified), fun = suitable_habitat)
+
+# rasterize the eez sf object
+eez_rast <- rasterize(eez_sf, suit_aqu, field = "rgn_id")
+
+# set any locations with a zero to NA
+suit_aqu[suit_aqu == 0] <- NA
+
+# select only locations in the eez raster suitable for species aquaculture
+eez_spec <- mask(eez_rast, suit_aqu)
+
+# sum the suitable aquaculture locations based on eez zones
+spec_count <- zonal(suit_aqu, eez_spec, fun = "sum") |> 
+  as.data.frame()
+
+# calculate the average cell size in km for the eez raster
+avg_area <- cellSize(eez_spec, unit = "km")
+
+# sum the total area of suitable aquaculture based on eez zones
+zonal_area <- zonal(avg_area, eez_spec, fun = "sum") |>
+  as.data.frame()
+
+# join to make one data frame with the counts and the total area
+spec_eez <-  left_join(eez_sf, spec_count, by = "rgn_id")
+spec_eez <-  left_join(eez_sf, zonal_area, by = "rgn_id")
+
+
+tm_basemap("Esri.OceanBasemap") +
+tm_shape(spec_eez) +
+  tm_polygons(fill = 'area.y',
+              fill.legend = tm_legend("Suitable Aquaculture Area")) +
+  tm_shape(suit_oyster_aqu) +
+  tm_raster(col.scale = tm_scale_categorical(labels = (c("Suitable Areas", "Unsuitable")),
+                                          values= (c("red", "white"))),
+            col.legend = tm_legend("Aquaculture Areas"))
+}
 ```
+
+```{r}
+potent_aqu(sst, eez_sf, depth, 6.75, 13.02, -125, 0)
+```
+
 
 # Additional species of interest: **Red Sea Urchin**, *Mesocentrotus franciscanus*
 ```{r}
