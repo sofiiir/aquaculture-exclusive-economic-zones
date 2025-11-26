@@ -260,10 +260,6 @@ eez_sf <-  left_join(eez_sf, oyst_area, by = "rgn_id")
 #eez_sf <-  left_join(eez_sf, zonal_area, by = "rgn_id")
 ```
 
-```{r}
-# suit_oyster_aqu
-```
-
 
 ```{r}
 # tm_basemap("Esri.OceanBasemap") +
@@ -287,7 +283,7 @@ tm_shape(eez_sf) +
   tm_polygons( fill = 'lyr1',
               fill.legend = tm_legend("Suitable Aquaculture Area")) +
   tm_text("rgn", size = 0.7) +
-  tm_shape(suit_oyster_aqu) + 
+  tm_shape(eez_oysters) + 
   tm_raster(col.scale = tm_scale_categorical(labels = (c("Suitable Areas", "Unsuitable")),
                                           values= (c("red", "white"))),
             col.legend = tm_legend("Aquaculture Areas")) 
