@@ -70,9 +70,7 @@ rm(sst_2008, sst_2009, sst_2010, sst_2011, sst_2012)
 ```
 
 ## Check CRS
-
-Use crs for rasters and st_crs for sf objects.
-
+Note: To check the CRS of a raster use crs. To check the CRS of a simple feature object use st_crs.
 ```{r}
 #| label: crs check
 #| warning: true
@@ -226,9 +224,10 @@ Preliminary maps to assess differences between adequate locations based on depth
 #| label: initial exploration maps
 
 # adequate depth for oyster aquaculture
+tm_basemap("Esri.OceanBasemap") +
 tm_shape(sst_classified) +
   tm_raster() + 
-  tm_title(text = "Adequate Sea Surface Temperatures for Oyster Aquaculture") +
+  tm_title(text = "Suitable Sea Surface Temperatures for Oyster Aquaculture") +
   tm_compass() +
   tm_scalebar() +
   tm_layout(legend.show = FALSE,
@@ -237,9 +236,10 @@ tm_shape(sst_classified) +
             ) 
 
 # adequate depth for oyster aquaculture
+tm_basemap("Esri.OceanBasemap") +
 tm_shape(depth_classified) +
   tm_raster() + 
-  tm_title(text = "Adequate Depths for Oyster Aquaculture") + 
+  tm_title(text = "Suitable Depths for Oyster Aquaculture") + 
   tm_compass() +
   tm_scalebar() +
   tm_layout(legend.show = FALSE,
@@ -248,9 +248,10 @@ tm_shape(depth_classified) +
             ) 
 
 # adequate locations for oyster aquaculture
+tm_basemap("Esri.OceanBasemap") +
 tm_shape(suit_oyster_aqu) +
-  tm_raster(col.scale = tm_scale_continuous(values = "Blues")) + 
-  tm_title(text = "Adequate Locations for Oyster Aquaculture based on bathymetry and sea surface temperature") +
+  tm_raster(col.scale = tm_scale_discrete(values = "red")) + 
+  tm_title(text = "Suitable Locations for Oyster Aquaculture based on bathymetry and sea surface temperature") +
   tm_compass() +
   tm_scalebar() +
   tm_layout(legend.show = FALSE,
@@ -551,7 +552,7 @@ urch_depth_matrix = matrix(c(-Inf, -125, 0,
 urch_depth_classified <- classify(depth, rcl = urch_depth_matrix)
 ```
 
-# Refrences 
+# References 
 ```{r}
 
 ```
