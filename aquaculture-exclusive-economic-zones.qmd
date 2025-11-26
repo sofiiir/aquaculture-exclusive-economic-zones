@@ -1,6 +1,6 @@
 ---
 title: "Aquaculture Exclusive Economic Zones"
-date: November 26, 2025
+date: November 29, 2025
 author: "Sofia Rodas"
 format: 
   html: 
@@ -25,17 +25,20 @@ library(tmap)
 library(patchwork)
 library(kableExtra)
 ```
-## Read in data 
+
+## Read in data
+
 ```{r}
 #| label: eez data read-in
 #| output: false
 
 # read in exclusive economic zones vector data
-eez <- vect(here::here("data","wc_regions_clean.shp"))
+# eez <- vect(here::here("data","wc_regions_clean.shp"))
 
 # read in eez data as an sf object
 eez_sf <- read_sf(here::here("data","wc_regions_clean.shp"))
 ```
+
 ```{r}
 #| label: depth data read-in
 #| output: false
@@ -44,9 +47,8 @@ eez_sf <- read_sf(here::here("data","wc_regions_clean.shp"))
 depth <- rast(here::here("data", "depth.tif"))
 ```
 
-
 ```{r}
-#| label: SST data read-in
+#| label: sst data read-in
 #| output: false
 
 # read in raster sea surface temperature data
@@ -59,6 +61,7 @@ sst_2012 <- rast(here::here("data", "average_annual_sst_2012.tif"))
 # stack data into a raster stack
 sst <- c(sst_2008, sst_2009, sst_2010, sst_2011, sst_2012)
 ```
+
 ```{r}
 #| label: clean environment
 
@@ -66,10 +69,12 @@ sst <- c(sst_2008, sst_2009, sst_2010, sst_2011, sst_2012)
 rm(sst_2008, sst_2009, sst_2010, sst_2011, sst_2012)
 ```
 
-## Check CRS 
+## Check CRS
+
 Use crs for rasters and st_crs for sf objects.
+
 ```{r}
-#| label: CRS check
+#| label: crs check
 #| warning: true
 
   if (crs(sst)== crs(depth)){
@@ -84,9 +89,11 @@ Use crs for rasters and st_crs for sf objects.
 #     warning("still not a match")
 #}
 ```
+
 Make all of the CRS match the SST CRS.
+
 ```{r}
-#| label: CRS matching
+#| label: crs matching
 
 depth <- project(depth, crs(sst))
 # eez <- project(eez, crs(sst))
@@ -95,8 +102,9 @@ eez_sf <- st_transform(eez_sf, crs(sst))
 ```
 
 Make sure the CRS alterations were successful.
+
 ```{r}
-#| label: CRS match confirmation
+#| label: crs match confirmation
 #| warning: true
 
   if (crs(sst)== crs(depth)){
@@ -110,6 +118,7 @@ Make sure the CRS alterations were successful.
 ## Data processing
 
 This analysis works off the mean of SST measured between 2008 and 2012.
+
 ```{r}
 #| label: sst mean and celcius
 
@@ -119,15 +128,18 @@ mean_sst <- mean(sst)
 # convert the units from kelvin to celcius
 mean_sst <- mean_sst - 273 
 ```
-This analysis requires SST and depth to have the same extent, resolution, and positions.
-Crop to make sure the extent of the rasters are the same. 
+
+This analysis requires SST and depth to have the same extent, resolution, and positions. Crop to make sure the extent of the rasters are the same.
+
 ```{r}
 #| label: depth extent match
 
 # crop the depth raster 
 depth <- crop(depth, mean_sst)
 ```
+
 Resample to make sure that the resolutions of the rasters are the same.
+
 ```{r}
 #| label: depth resolution match
 
@@ -135,6 +147,7 @@ depth <- resample(depth, mean_sst)
 ```
 
 Make sure the extents and resolutions match for the SST and depth data frames.
+
 ```{r}
 #| label: depth extent and resolution confirmation
 #| warning: true
@@ -154,12 +167,15 @@ if (res(mean_sst)[1]== res(depth)[1] & res(mean_sst)[2]== res(depth)[2]){
 ```
 
 # Find cells where conditions are satisfied for both the sst and depth for specific species.
-1. Make a matrix
-2. Reclassify based on that matrix
 
-Sea surface temperature is adequate for oysters in the range of 11-30°C. Classify sea surface temperature to find those areas where potential zones for oyster growth exist.
+1.  Make a matrix
+2.  Reclassify based on that matrix
+
+Sea surface temperature is adequate for oysters in the range of 11-30°C. Classify sea surface temperature to find those areas that are potential zones for oyster aquaculture.
+
 ```{r}
 #| label: sst classification
+
 # create a classification matrix for sst
 sst_matrix <- matrix(c(-Inf, 11, 0, 
             11, 30, 1, 
@@ -170,7 +186,8 @@ sst_matrix <- matrix(c(-Inf, 11, 0,
 sst_classified <- classify(mean_sst, rcl = sst_matrix)
 ```
 
-Oysters can survive between the depths of 70 and 0 below sea level. 
+Oysters can survive between the depths of 70 and 0 below sea level. Classify depth to find those areas that are potential zones for oyster aquaculture.
+
 ```{r}
 #| label: depth classification
 
@@ -185,6 +202,7 @@ depth_classified <- classify(depth, rcl = depth_matrix)
 ```
 
 Create a function to determine what locations are suited for oyster aquaculture based on both sea surface temperature and depth.
+
 ```{r}
 #| label: suitable area function 
 
@@ -193,13 +211,17 @@ suitable_habitat <- function(rast1, rast2){
   rast1 * rast2
 }
 ```
+
 Apply the function to determine what areas are suitable based on both sst and depth for oyster aquaculture.
+
 ```{r}
 #| label: suitable area application
 
 suit_oyster_aqu <- lapp(c(sst_classified, depth_classified), fun = suitable_habitat)
 ```
-Preliminary maps to assess differences between adequate locations based on depth, sst, and both depth and sst. 
+
+Preliminary maps to assess differences between adequate locations based on depth, sst, and both depth and sst.
+
 ```{r}
 #| label: initial exploration maps
 
@@ -207,23 +229,42 @@ Preliminary maps to assess differences between adequate locations based on depth
 tm_shape(sst_classified) +
   tm_raster() + 
   tm_title(text = "Adequate Sea Surface Temperatures for Oyster Aquaculture") +
-  tm_layout(legend.show = FALSE)
+  tm_compass() +
+  tm_scalebar() +
+  tm_layout(legend.show = FALSE,
+            compass.position = tm_pos_out("right", "bottom"),
+            scalebar.position = tm_pos_out("center", "bottom")
+            ) 
 
 # adequate depth for oyster aquaculture
 tm_shape(depth_classified) +
   tm_raster() + 
   tm_title(text = "Adequate Depths for Oyster Aquaculture") + 
-  tm_layout(legend.show = FALSE)
+  tm_compass() +
+  tm_scalebar() +
+  tm_layout(legend.show = FALSE,
+            compass.position = tm_pos_out("right", "bottom"),
+            scalebar.position = tm_pos_out("center", "bottom")
+            ) 
 
 # adequate locations for oyster aquaculture
 tm_shape(suit_oyster_aqu) +
   tm_raster(col.scale = tm_scale_continuous(values = "Blues")) + 
   tm_title(text = "Adequate Locations for Oyster Aquaculture based on bathymetry and sea surface temperature") +
-  tm_layout(legend.show = FALSE)
+  tm_compass() +
+  tm_scalebar() +
+  tm_layout(legend.show = FALSE,
+            compass.position = tm_pos_out("right", "bottom"),
+            scalebar.position = tm_pos_out("center", "bottom")
+            ) 
+
+# TRY THESE WITH A BASEMAP
 ```
 
 # How much suitable aquaculture space is there for each Exclusive Economic Zones?
-Find the suitable aquaculture locations for each EEZ. 
+
+Find the suitable aquaculture locations for each EEZ.
+
 ```{r}
 #| label: suitable area per eez
 
@@ -248,9 +289,13 @@ oyst_area <- zonal(x = (eez_oysters * avg_area),
 
 # join to make one data frame with the total area
 eez_sf <-  left_join(eez_sf, oyst_area, by = "rgn_id")
+
+# rename new column 
+eez_sf <- eez_sf |> 
+  rename("area" = "lyr1")
 ```
-Then join the reclassified with the eez to get a dataframe with value, eez, x, y.
-Count the cells. Number of cells that equal 1 times the cellsize() = total area that is suitable. 
+
+Then join the reclassified with the eez to get a dataframe with value, eez, x, y. Count the cells. Number of cells that equal 1 times the cellsize() = total area that is suitable.
 
 ```{r}
 # calculate average size of cells
@@ -268,8 +313,10 @@ Count the cells. Number of cells that equal 1 times the cellsize() = total area 
 
 # total_oyst <- expanse(eez_oysters)
 ```
+
 #### How much suitable space is there for oyster aquaculture?
-The total amount of space in the  Exclusive Economic Zones (EEZ) that are suitable for oyster aquaculture is `r total_oyst`.
+
+The total amount of space in the Exclusive Economic Zones (EEZ) that are suitable for oyster aquaculture is `r total_oyst`.
 
 ```{r}
 # number of cells that equal 1 * cellsize() = total area that is suitable
@@ -296,7 +343,6 @@ The total amount of space in the  Exclusive Economic Zones (EEZ) that are suitab
 #eez_sf <-  left_join(eez_sf, zonal_area, by = "rgn_id")
 ```
 
-
 ```{r}
 # tm_basemap("Esri.OceanBasemap") +
 # tm_shape(eez_rast) +
@@ -313,22 +359,29 @@ The total amount of space in the  Exclusive Economic Zones (EEZ) that are suitab
 #             col.legend = tm_legend("Aquaculture Areas"))
 
 ```
+
 ```{r}
 #| label: eez map by suitable area amount
 
 tm_basemap("Esri.OceanBasemap") +
 tm_shape(eez_sf) +
-  tm_polygons( fill = 'lyr1',
+  tm_polygons( fill = 'area',
               fill.legend = tm_legend("Suitable Aquaculture Area")) +
   tm_text("rgn", size = 0.7) +
   tm_shape(eez_oysters) + 
   tm_raster(col.scale = tm_scale_categorical(labels = (c("Suitable Areas", "Unsuitable")),
                                           values= (c("red", "white"))),
-            col.legend = tm_legend("Aquaculture Areas")) 
-  #tm_title()
+            col.legend = tm_legend("Aquaculture Areas")) + 
+  tm_compass() +
+  tm_scalebar() +
+  tm_title("Exclusive Economic Zones shaded by Suitable Oyster Aquaculture Area ") +
+  tm_layout(compass.position = tm_pos_out("right", "bottom"),
+            scalebar.position = tm_pos_out("center", "bottom")
+            ) 
+# CHANGE LEGEND SIZE
+# ADD HARD BREAKS FOR OYSTERS 
 
 ```
-
 
 ```{r}
 # regions <- c("Oregon", "Northern California", "Central California", "Southern California", "Washington")
@@ -360,8 +413,6 @@ tm_shape(eez_sf) +
 # }
 ```
 
-
-
 ```{r}
 # create a table with the counts of adequate aquaculture zones 
 # oyster_aquaculture |> 
@@ -371,9 +422,19 @@ tm_shape(eez_sf) +
 #   kable_styling() 
 ```
 
-# Writing a function
+# Potential aquaculture locations
+
 ```{r}
-potent_aqu <- function (sst, eez_sf, depth, min_sst, max_sst, min_depth, max_depth, species_name){
+#| label: potential aquaculture location function
+
+potent_aqu <- function (sst, 
+                        eez_sf, 
+                        depth, 
+                        min_sst, 
+                        max_sst, 
+                        min_depth, 
+                        max_depth, 
+                        species_name){
 
 # make all of the CRS match
 depth <- project(depth, crs(sst))
@@ -424,40 +485,50 @@ eez_rast <- rasterize(eez_sf, suit_aqu, field = "rgn_id")
 suit_aqu[suit_aqu == 0] <- NA
 
 # select only suitable oyster aquaculture locations that are within the eez
-eez_oysters <- mask(suit_oyster_aqu, eez_sf)
+eez_spec <- mask(suit_aqu, eez_sf)
 
 # calculate average size of cells
-avg_area <- cellSize(eez_oysters, unit = "km")
+avg_area <- cellSize(eez_spec, unit = "km")
 
 # sum the suitable aquaculture locations based on eez zones
-oyst_area <- zonal(x = (eez_oysters * avg_area), 
+spec_area <- zonal(x = (eez_spec * avg_area), 
                    z = eez_rast, 
                    fun = "sum", 
                    na.rm = TRUE) |> 
               as.data.frame()
 
-# join to make one df with containing are adeuqate for aquaculture per eez
-eez_sf <-  left_join(eez_sf, oyst_area, by = "rgn_id")
+# join to make one data frame with the total area
+spec_area_eez <-  left_join(eez_sf, spec_area, by = "rgn_id")
+
+# rename new column 
+spec_area_eez <- spec_area_eez |> 
+  rename("spec_area" = "lyr1")
 
 # map the eez's based on the amount of suitable area per region
 tm_basemap("Esri.OceanBasemap") +
-tm_shape(eez_sf) +
-  tm_polygons(fill = 'area.y',
+tm_shape(spec_area_eez) +
+  tm_polygons(fill = "spec_area",
               fill.legend = tm_legend("Suitable Aquaculture Area")) +
-  tm_shape(suit_oyster_aqu) +
+  tm_text("rgn", size = 0.7) +
+  tm_shape(eez_oysters) + 
   tm_raster(col.scale = tm_scale_categorical(labels = (c("Suitable Areas", "Unsuitable")),
                                           values= (c("red", "white"))),
-            col.legend = tm_legend("Aquaculture Areas")) +
-  tm_title(paste("Suitable aquaculture area", species_name))
+            col.legend = tm_legend("Aquaculture Areas")) + 
+  tm_compass() +
+  tm_scalebar() +
+  tm_title("Exclusive Economic Zones shaded by Suitable Oyster Aquaculture Area ") +
+  tm_layout(compass.position = tm_pos_out("right", "bottom"),
+            scalebar.position = tm_pos_out("center", "bottom")
+            ) 
 }
 ```
-
+# Additional species of interest: **Red Sea Urchin**, *Mesocentrotus franciscanus*
 ```{r}
+#| label: suitable area for Mesocentrotus franciscanus
 potent_aqu(sst, eez_sf, depth, 6.75, 13.02, -125, 0, "Mesocentrotus franciscanus")
 ```
 
 
-# Additional species of interest: **Red Sea Urchin**, *Mesocentrotus franciscanus*
 ```{r}
 # create a classification matrix for sst
 urch_sst_matrix <- matrix(c(-Inf, 6.75, 0, 
@@ -478,5 +549,10 @@ urch_depth_matrix = matrix(c(-Inf, -125, 0,
 
 # classify where suitable depth habitat for oysters are
 urch_depth_classified <- classify(depth, rcl = urch_depth_matrix)
+```
+
+# Refrences 
+```{r}
+
 ```
 
