@@ -32,9 +32,6 @@ library(kableExtra)
 #| label: eez data read-in
 #| output: false
 
-# read in exclusive economic zones vector data
-# eez <- vect(here::here("data","wc_regions_clean.shp"))
-
 # read in eez data as an sf object
 eez_sf <- read_sf(here::here("data","wc_regions_clean.shp"))
 ```
@@ -80,12 +77,6 @@ Note: To check the CRS of a raster use crs. To check the CRS of a simple feature
 }else {
     warning("still not a match")
 }
-
-#  if (crs(sst)== crs(eez)){
-#   print("it's a match!")
-# }else {
-#     warning("still not a match")
-#}
 ```
 
 Make all of the CRS match the SST CRS.
@@ -94,8 +85,6 @@ Make all of the CRS match the SST CRS.
 #| label: crs matching
 
 depth <- project(depth, crs(sst))
-# eez <- project(eez, crs(sst))
-
 eez_sf <- st_transform(eez_sf, crs(sst))
 ```
 
@@ -236,7 +225,6 @@ tm_shape(sst_classified) +
             ) 
 
 # adequate depth for oyster aquaculture
-tm_basemap("Esri.OceanBasemap") +
 tm_shape(depth_classified) +
   tm_raster() + 
   tm_title(text = "Suitable Depths for Oyster Aquaculture") + 
@@ -259,7 +247,7 @@ tm_shape(suit_oyster_aqu) +
             scalebar.position = tm_pos_out("center", "bottom")
             ) 
 
-# TRY THESE WITH A BASEMAP
+
 ```
 
 # How much suitable aquaculture space is there in each Exclusive Economic Zone (EEZ)?
@@ -296,46 +284,12 @@ eez_sf <- eez_sf |>
   rename("area" = "lyr1")
 ```
 
-```{r}
-# calculate average size of cells
-# avg_area <- cellSize(eez_oysters, unit = "km")
-# 
-# # sum the suitable aquaculture locations based on eez zones
-# oyst_area <- zonal(x = (eez_oysters * avg_area), 
-#                    z = eez_rast, 
-#                    fun = "sum", 
-#                    na.rm = TRUE) |> 
-#   as.data.frame()
-
-# oyster_aquaculture <- zonal(eez_oysters, eez_rast, fun = 'notNA') |> 
-#   mutate(region = eez$rgn)
-
-# total_oyst <- expanse(eez_oysters)
-```
-
 #### How much suitable space is there for oyster aquaculture?
 ```{r}
 total_oyst <- sum(eez_sf$area)
 ```
 
 The total amount of space in the Exclusive Economic Zones (EEZ) on the West Coast that are suitable for oyster aquaculture based on suitable sea surface temperature and suitable bathymetry is `r total_oyst`.
-
-```{r}
-# tm_basemap("Esri.OceanBasemap") +
-# tm_shape(eez_rast) +
-#   tm_raster(col  = tm_vars("rgn"),
-#               col.scale = tm_scale(values = (c("#7FB7BE",
-#                                                 "#D3F3EE",
-#                                                 "#5E6472",
-#                                                 "#065A82",
-#                                                 "#1F1A38"))),
-#               fill.legend = tm_legend("West Coast EEZ Regions")) +
-#   tm_shape(suit_oyster_aqu) + 
-#   tm_raster(col.scale = tm_scale_categorical(labels = (c("Suitable Areas", "Unsuitable")),
-#                                           values= (c("red", "white"))),
-#             col.legend = tm_legend("Aquaculture Areas"))
-
-```
 
 ```{r}
 #| label: eez map by suitable area amount
@@ -360,43 +314,14 @@ tm_shape(eez_sf) +
 
 ```
 
-```{r}
-# regions <- c("Oregon", "Northern California", "Central California", "Southern California", "Washington")
-# 
-# # suit_oyster_area_df <- as.data.frame(suit_oyster_area)
-# 
-# eez_areas <- function(suit_oyster_aqu, eez_sf, regions){
-#  for (regions in 1:5){
-#    
-#     eez_region_area <- subset(eez_sf, rgn == regions)
-#   
-#   # eez_region_area <- eez_sf[eez_sf$rgn == regions]
-#   
-#     suit_oyster_area <- mask(suit_oyster_aqu, eez_region_area)
-#   
-#     suit_oyster_area[suit_oyster_area == 0] <- NA
-#   
-#     suit_area <- expanse(suit_oyster_area)[1, 2]
-#     
-#     return(suit_area)
-#     # suit_oyster_area_df <- as.data.frame(suit_oyster_area)
-#     # 
-#     #  suit_area <- suit_oyster_area_df |> 
-#     #  mutate(area = expanse(suit_oyster_area)) 
-#     # eez_sf <- eez_sf |> mutate(area = suit_area)
-#  }
-#   
-# 
-# }
-```
 
 ```{r}
-# create a table with the counts of adequate aquaculture zones 
-# oyster_aquaculture |> 
-#   relocate(region, .before = lyr1) |> 
-#   rename(counts = lyr1) |> 
-#   kbl(caption = "West Coast regions Exclusive Economic Zones (EEZ).") |> 
-#   kable_styling() 
+# create a table with the counts of adequate aquaculture zones
+# oyster_aquaculture |>
+#   relocate(region, .before = lyr1) |>
+#   rename(counts = lyr1) |>
+#   kbl(caption = "West Coast regions Exclusive Economic Zones (EEZ).") |>
+#   kable_styling()
 ```
 
 # Potential aquaculture locations
