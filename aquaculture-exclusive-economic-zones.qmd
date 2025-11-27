@@ -262,7 +262,7 @@ tm_shape(suit_oyster_aqu) +
 # TRY THESE WITH A BASEMAP
 ```
 
-# How much suitable aquaculture space is there for each Exclusive Economic Zones?
+# How much suitable aquaculture space is there in each Exclusive Economic Zone (EEZ)?
 
 Find the suitable aquaculture locations for each EEZ.
 
@@ -296,8 +296,6 @@ eez_sf <- eez_sf |>
   rename("area" = "lyr1")
 ```
 
-Then join the reclassified with the eez to get a dataframe with value, eez, x, y. Count the cells. Number of cells that equal 1 times the cellsize() = total area that is suitable.
-
 ```{r}
 # calculate average size of cells
 # avg_area <- cellSize(eez_oysters, unit = "km")
@@ -316,33 +314,11 @@ Then join the reclassified with the eez to get a dataframe with value, eez, x, y
 ```
 
 #### How much suitable space is there for oyster aquaculture?
-
-The total amount of space in the Exclusive Economic Zones (EEZ) that are suitable for oyster aquaculture is `r total_oyst`.
-
 ```{r}
-# number of cells that equal 1 * cellsize() = total area that is suitable
-# expanse WOULD NEED TO MAKE THINGS NA 
-
-
-
-# avg_area <- mean(avg_area)
-
-# area <- (oyster_aquaculture$lyr1 * avg_area) |> 
-#   as.data.frame()
-
-# sum the total area of suitable aquaculture based on eez zones
-# zonal_area <- zonal(avg_area, eez_oysters, fun = "sum") |>
-#   as.data.frame()
-  
+total_oyst <- sum(eez_sf$area)
 ```
 
-```{r}
-# join to make one data frame with the total area
-# eez_sf <-  left_join(eez_sf, oyst_area, by = "rgn_id")
-
-
-#eez_sf <-  left_join(eez_sf, zonal_area, by = "rgn_id")
-```
+The total amount of space in the Exclusive Economic Zones (EEZ) on the West Coast that are suitable for oyster aquaculture based on suitable sea surface temperature and suitable bathymetry is `r total_oyst`.
 
 ```{r}
 # tm_basemap("Esri.OceanBasemap") +
