@@ -1,5 +1,5 @@
 ---
-title: "Aquaculture Exclusive Economic Zones"
+title: "Potential Aquaculture Locations within Exclusive Economic Zones"
 date: November 29, 2025
 author: "Sofia Rodas"
 format: 
@@ -205,29 +205,34 @@ Apply the function to determine what areas are suitable based on both sst and de
 #| label: suitable area application
 
 suit_oyster_aqu <- lapp(c(sst_classified, depth_classified), fun = suitable_habitat)
+
+# set any locations with a zero to NA
+suit_oyster_aqu[suit_oyster_aqu == 0] <- NA
 ```
 
-Preliminary maps to assess differences between adequate locations based on depth, sst, and both depth and sst.
+Preliminary maps to assess differences between suitable locations based on depth, sst, and both depth and sst.
 
 ```{r}
 #| label: initial exploration maps
 
-# adequate depth for oyster aquaculture
+# suitable depth for oyster aquaculture
 tm_basemap("Esri.OceanBasemap") +
 tm_shape(sst_classified) +
   tm_raster(style = "cat",
             palette = c("skyblue", "red"),
             labels = c("unsuitable", "suitable"),
             title = "Sea Surface Temperature (SST)") + 
-  tm_title(text = "Suitable Sea Surface Temperatures for Oyster Aquaculture") +
+  tm_title(text = "Suitable Sea Surface Temperatures for Oyster Aquaculture",
+           size = 2) +
   tm_compass() +
   tm_scalebar() +
-  tm_layout(
-            compass.position = tm_pos_out("right", "bottom"),
-            scalebar.position = tm_pos_out("center", "bottom")
+  tm_layout(fontsize = 2,
+            scale = 0.5,
+            compass.position = tm_pos_in("left", "bottom"),
+            scalebar.position = tm_pos_in("left", "bottom")
             ) 
 
-# adequate depth for oyster aquaculture
+# suitable depth for oyster aquaculture
 tm_shape(depth_classified) +
   tm_raster(style = "cat",
             palette = c("skyblue", "red"),
@@ -237,17 +242,17 @@ tm_shape(depth_classified) +
   tm_compass() +
   tm_scalebar() +
   tm_layout(
-            compass.position = tm_pos_out("right", "bottom"),
+            compass.position = tm_pos_in("right", "bottom"),
             scalebar.position = tm_pos_out("center", "bottom")
             ) 
 
-# adequate locations for oyster aquaculture
+# suitable locations for oyster aquaculture
 tm_basemap("Esri.OceanBasemap") +
 tm_shape(suit_oyster_aqu) +
   tm_raster(style = "cat",
-            palette = c( "skyblue", "red"),
-            labels = c("unsuitable", "suitable"),
-            title = "Suiability based on SST and depth") + 
+            palette = c( "red"),
+            labels = c("suitable"),
+            title = "Aquaculture suitability") + 
   tm_title(text = "Suitable Locations for Oyster Aquaculture based on bathymetry and sea surface temperature") +
   tm_compass() +
   tm_scalebar() +
