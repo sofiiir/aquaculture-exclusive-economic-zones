@@ -238,12 +238,14 @@ tm_shape(depth_classified) +
             palette = c("skyblue", "red"),
             labels = c("unsuitable", "suitable"),
             title = "Depth suitability") + 
-  tm_title(text = "Suitable Depths for Oyster Aquaculture") + 
+  tm_title(text = "Suitable Depths for Oyster Aquaculture",
+           size = 2) + 
   tm_compass() +
   tm_scalebar() +
-  tm_layout(
-            compass.position = tm_pos_in("right", "bottom"),
-            scalebar.position = tm_pos_out("center", "bottom")
+  tm_layout(fontsize = 2,
+            scale = 0.5,
+            compass.position = tm_pos_in("left", "bottom"),
+            scalebar.position = tm_pos_in("left", "bottom")
             ) 
 
 # suitable locations for oyster aquaculture
@@ -256,9 +258,10 @@ tm_shape(suit_oyster_aqu) +
   tm_title(text = "Suitable Locations for Oyster Aquaculture based on bathymetry and sea surface temperature") +
   tm_compass() +
   tm_scalebar() +
-  tm_layout(
-            compass.position = tm_pos_out("right", "bottom"),
-            scalebar.position = tm_pos_out("center", "bottom")
+  tm_layout(fontsize = 2,
+            scale = 0.5,
+            compass.position = tm_pos_in("left", "bottom"),
+            scalebar.position = tm_pos_in("left", "bottom")
             ) 
 
 
@@ -273,9 +276,6 @@ Find the suitable aquaculture locations for each EEZ.
 
 # rasterize the eez sf object
 eez_rast <- rasterize(eez_sf, suit_oyster_aqu, field = "rgn_id")
-
-# set any locations with a zero to NA
-suit_oyster_aqu[suit_oyster_aqu == 0] <- NA
 
 # select only suitable oyster aquaculture locations that are within the eez
 eez_oysters <- mask(suit_oyster_aqu, eez_sf)
@@ -320,8 +320,10 @@ tm_shape(eez_sf) +
   tm_compass() +
   tm_scalebar() +
   tm_title("Exclusive Economic Zones shaded by Suitable Oyster Aquaculture Area ") +
-  tm_layout(compass.position = tm_pos_out("right", "bottom"),
-            scalebar.position = tm_pos_out("center", "bottom")
+  tm_layout(fontsize = 2,
+            scale = 0.5,
+            compass.position = tm_pos_in("left", "bottom"),
+            scalebar.position = tm_pos_in("left", "bottom")
             ) 
 # CHANGE LEGEND SIZE
 # ADD HARD BREAKS FOR OYSTERS 
@@ -433,8 +435,10 @@ tm_shape(spec_area_eez) +
   tm_compass() +
   tm_scalebar() +
   tm_title("Exclusive Economic Zones shaded by Suitable Oyster Aquaculture Area ") +
-  tm_layout(compass.position = tm_pos_out("right", "bottom"),
-            scalebar.position = tm_pos_out("center", "bottom")
+  tm_layout(fontsize = 2,
+            scale = 0.5,
+            compass.position = tm_pos_in("left", "bottom"),
+            scalebar.position = tm_pos_in("left", "bottom")
             ) 
 }
 ```
