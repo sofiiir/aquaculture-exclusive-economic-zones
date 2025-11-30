@@ -332,12 +332,16 @@ tm_shape(eez_sf) +
 
 
 ```{r}
+eez_kable <- eez_sf |> 
+  st_drop_geometry() |> 
+  rename("State" = "rgn",
+         "Suitable area" = "area")
+
 # create a table with the counts of adequate aquaculture zones
-# oyster_aquaculture |>
-#   relocate(region, .before = lyr1) |>
-#   rename(counts = lyr1) |>
-#   kbl(caption = "West Coast regions Exclusive Economic Zones (EEZ).") |>
-#   kable_styling()
+eez_kable |>
+  select("State", "Suitable area") |>
+  kbl(caption = "Suitable Oyster Aquaculture areas on the West Coast based Exclusive Economic Zones (EEZ).") |>
+  kable_styling()
 ```
 
 # Potential aquaculture locations
