@@ -18,6 +18,7 @@ Aquaculture is a viable solution to help address over-fishing while providing oc
 -**Additional Species SST and bathymetry Values:** Species suitable SST and bathymetry ranges are available through [SeaLifeBase](https://www.sealifebase.ca/search.php). It is publicly available.
 
 ## File structure:
+<img width="367" height="229" alt="eds223-aqu-tree" src="https://github.com/user-attachments/assets/10a77beb-e58c-4e00-bb91-023488dedc00" />
 
 
 **Note:** Data was added to .gitignore. Data can be downloaded from a [Google Drive](https://drive.google.com/file/d/1u-iwnPDbe6ZK7wSFVMI-PpCKaRQ3RVmg/view).
