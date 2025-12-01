@@ -2629,7 +2629,7 @@ border: 0;
 <span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>sst_classified <span class="ot">&lt;-</span> <span class="fu">classify</span>(mean_sst, <span class="at">rcl =</span> sst_matrix)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>Oysters can survive between the depths of 70 and 0 below sea level. Classify depth to find those areas that are potential zones for oyster aquaculture.</p>
+<p>Oysters can survive between the depths of 70 and 0 meters below the sea surface. Classify depth to find those areas that are potential zones for oyster aquaculture.</p>
 <div class="cell">
 <details open class="code-fold">
 <summary>Code</summary>
@@ -2829,12 +2829,12 @@ border: 0;
 <span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="co"># create a table with the counts of adequate aquaculture zones</span></span>
 <span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>eez_kable <span class="sc">|&gt;</span></span>
 <span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">&quot;State&quot;</span>, <span class="st">&quot;Suitable area (km^2)&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">caption =</span> <span class="st">&quot;Suitable Oyster Aquaculture areas on the West Coast based Exclusive Economic Zones (EEZ).&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">caption =</span> <span class="st">&quot;Suitable Oyster Aquaculture areas on the West Coast based on Exclusive Economic Zones (EEZ).&quot;</span>) <span class="sc">|&gt;</span></span>
 <span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <table class="table caption-top table-sm table-striped small">
-<caption>Suitable Oyster Aquaculture areas on the West Coast based Exclusive Economic Zones (EEZ).</caption>
+<caption>Suitable Oyster Aquaculture areas on the West Coast based on Exclusive Economic Zones (EEZ).</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;" data-quarto-table-cell-role="th">State</th>
@@ -2975,10 +2975,12 @@ border: 0;
 </section>
 <section id="additional-species-of-interest-red-sea-urchin-mesocentrotus-franciscanus" class="level1">
 <h1>Additional species of interest: <strong>Red Sea Urchin</strong>, <em>Mesocentrotus franciscanus</em></h1>
+<p>Sea surface temperature is adequate for red sea urchins in the range of 6.75-13.02°C. Red sea urchins can survive between the depths of 125 and 0 meters below the sea surface.</p>
 <div class="cell">
 <details open class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">potent_aqu</span>(sst, eez_sf, depth, <span class="fl">6.75</span>, <span class="fl">13.02</span>, <span class="sc">-</span><span class="dv">125</span>, <span class="dv">0</span>, <span class="st">&quot;Mesocentrotus franciscanus&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run the function to identify potential suitable areas for red sea urchin aquaculture </span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">potent_aqu</span>(sst, eez_sf, depth, <span class="fl">6.75</span>, <span class="fl">13.02</span>, <span class="sc">-</span><span class="dv">125</span>, <span class="dv">0</span>, <span class="st">&quot;Mesocentrotus franciscanus&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -2988,6 +2990,10 @@ border: 0;
 </div>
 </div>
 </div>
+</section>
+<section id="reflection" class="level1">
+<h1>Reflection</h1>
+<p>Analyzing potential aquaculture locations based on SST and bathymetry is only the first step in finding suitable locations for new aquaculture endeavors. One limitation of the above analysis is that SST is an average taken from 2008 to 2012. With climate change shifting temperatures, projection data would be important to include in analyzing best future aquaculture sites. Referencing species native ranges is also essential to reducing any potential negative outcomes of introducing non-native species.</p>
 </section>
 <section id="references" class="level1">
 <h1>References</h1>

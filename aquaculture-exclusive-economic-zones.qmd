@@ -3,7 +3,7 @@ title: "Potential Aquaculture Locations within Exclusive Economic Zones"
 date: November 30, 2025
 author: "Sofia Rodas"
 format: 
-  html: 
+  html:
     code-fold: show
     embed-resources: true
 execute: 
@@ -176,7 +176,7 @@ sst_matrix <- matrix(c(-Inf, 11, 0,
 sst_classified <- classify(mean_sst, rcl = sst_matrix)
 ```
 
-Oysters can survive between the depths of 70 and 0 below sea level. Classify depth to find those areas that are potential zones for oyster aquaculture.
+Oysters can survive between the depths of 70 and 0 meters below the sea surface. Classify depth to find those areas that are potential zones for oyster aquaculture.
 
 ```{r}
 #| label: depth classification
@@ -347,7 +347,7 @@ eez_kable <- eez_sf |>
 # create a table with the counts of adequate aquaculture zones
 eez_kable |>
   select("State", "Suitable area (km^2)") |>
-  kbl(caption = "Suitable Oyster Aquaculture areas on the West Coast based Exclusive Economic Zones (EEZ).") |>
+  kbl(caption = "Suitable Oyster Aquaculture areas on the West Coast based on Exclusive Economic Zones (EEZ).") |>
   kable_styling()
 ```
 
@@ -455,10 +455,16 @@ tm_shape(spec_area_eez) +
 }
 ```
 # Additional species of interest: **Red Sea Urchin**, *Mesocentrotus franciscanus*
+
+Sea surface temperature is adequate for red sea urchins in the range of 6.75-13.02°C. Red sea urchins can survive between the depths of 125 and 0 meters below the sea surface.
 ```{r}
 #| label: suitable area for Mesocentrotus franciscanus
+
+# run the function to identify potential suitable areas for red sea urchin aquaculture 
 potent_aqu(sst, eez_sf, depth, 6.75, 13.02, -125, 0, "Mesocentrotus franciscanus")
 ```
+# Reflection
+Analyzing potential aquaculture locations based on SST and bathymetry is only the first step in finding suitable locations for new aquaculture endeavors. One limitation of the above analysis is that SST is an average taken from 2008 to 2012. With climate change shifting temperatures, projection data would be important to include in analyzing best future aquaculture sites. Referencing species native ranges is also essential to reducing any potential negative outcomes of introducing non-native species. 
 
 # References 
 
