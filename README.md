@@ -27,7 +27,7 @@ Aquaculture is a viable solution to help address over-fishing while providing oc
 -**Quarto document:** [aquaculture-exclusive-economic-zones.qmd](https://github.com/sofiiir/aquaculture-exclusive-economic-zones/blob/main/aquaculture-exclusive-economic-zones.qmd)
 
 
-### References:
+## References:
 
 Flanders Marine Institute (2025): MarineRegions.org. Available online at www.marineregions.org. Consulted on 2025-11-14.
 
