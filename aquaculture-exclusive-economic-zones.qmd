@@ -1,6 +1,6 @@
 ---
 title: "Potential Aquaculture Locations within Exclusive Economic Zones"
-date: November 29, 2025
+date: November 30, 2025
 author: "Sofia Rodas"
 format: 
   html: 
@@ -12,6 +12,9 @@ execute:
   warning: false
   error: false
 ---
+## Introduction
+
+Aquaculture is a viable solution to help address over-fishing while providing ocean foods to communities that rely on them. It additionally creates a job sector increasing local employment opportunities. Though there are many factors in choosing suitable locations for aquaculture, sea surface temperature (SST) and bathymetry are two key considerations. This analysis focuses on creating a function that identifies potential aquaculture locations based on SST and bathymetry species requirements. Further, the findings of potential aquaculture locations for each species is broken into Exclusive Economic Zones (EEZ).
 
 ```{r}
 #| label: import libraries
@@ -104,7 +107,7 @@ Make sure the CRS alterations were successful.
 
 ## Data processing
 
-This analysis works off the mean of SST measured between 2008 and 2012.
+This analysis works based on the mean of Sea Surface Temperature (SST) measured between 2008 and 2012.
 
 ```{r}
 #| label: sst mean and celcius
@@ -239,7 +242,7 @@ tm_shape(depth_classified) +
             labels = c("unsuitable", "suitable"),
             title = "Depth suitability") + 
   tm_title(text = "Suitable Depths for Oyster Aquaculture",
-           size = 2) + 
+           size = 3) + 
   tm_compass() +
   tm_scalebar() +
   tm_layout(fontsize = 2,
@@ -253,9 +256,10 @@ tm_basemap("Esri.OceanBasemap") +
 tm_shape(suit_oyster_aqu) +
   tm_raster(style = "cat",
             palette = c( "red"),
-            labels = c("suitable"),
+            labels = c("suitable area"),
             title = "Aquaculture suitability") + 
-  tm_title(text = "Suitable Locations for Oyster Aquaculture based on bathymetry and sea surface temperature") +
+  tm_title(text = "Suitable Locations for Oyster Aquaculture based on bathymetry and sea surface temperature",
+           size = 4) +
   tm_compass() +
   tm_scalebar() +
   tm_layout(fontsize = 2,
@@ -303,15 +307,21 @@ eez_sf <- eez_sf |>
 total_oyst <- sum(eez_sf$area)
 ```
 
-The total amount of space in the Exclusive Economic Zones (EEZ) on the West Coast that are suitable for oyster aquaculture based on suitable sea surface temperature and suitable bathymetry is `r total_oyst`.
+The total amount of space in the Exclusive Economic Zones (EEZ) on the West Coast that are suitable for oyster aquaculture based on suitable sea surface temperature and suitable bathymetry is `r total_oyst` km^2.
 
 ```{r}
 #| label: eez map by suitable area amount
 
 tm_basemap("Esri.OceanBasemap") +
 tm_shape(eez_sf) +
-  tm_polygons( fill = 'area',
-              fill.legend = tm_legend("Suitable Aquaculture Area")) +
+  tm_polygons(fill = 'area',
+              breaks = c(400, 1000, 1500, 3000, 3400, 4000),
+              palette = c("#EEF5FC",
+                          "#96C3ED",
+                          "#237DD1",
+                          "#1B5E9D",
+                          "#0C3259"),
+              title = "Suitable Aquaculture Area (km^2)") +
   tm_text("rgn", size = 0.7) +
   tm_shape(eez_oysters) + 
   tm_raster(col.scale = tm_scale_categorical(labels = (c("Suitable Areas", "Unsuitable")),
@@ -319,15 +329,12 @@ tm_shape(eez_sf) +
             col.legend = tm_legend("Aquaculture Areas")) + 
   tm_compass() +
   tm_scalebar() +
-  tm_title("Exclusive Economic Zones shaded by Suitable Oyster Aquaculture Area ") +
+  tm_title("Suitable Oyster Aquaculture Area in Exclusive Economic Zones (EEZ)",
+           size = 3) +
   tm_layout(fontsize = 2,
             scale = 0.5,
             compass.position = tm_pos_in("left", "bottom"),
-            scalebar.position = tm_pos_in("left", "bottom")
-            ) 
-# CHANGE LEGEND SIZE
-# ADD HARD BREAKS FOR OYSTERS 
-
+            scalebar.position = tm_pos_in("left", "bottom")) 
 ```
 
 
@@ -335,16 +342,16 @@ tm_shape(eez_sf) +
 eez_kable <- eez_sf |> 
   st_drop_geometry() |> 
   rename("State" = "rgn",
-         "Suitable area" = "area")
+         "Suitable area (km^2)" = "area")
 
 # create a table with the counts of adequate aquaculture zones
 eez_kable |>
-  select("State", "Suitable area") |>
+  select("State", "Suitable area (km^2)") |>
   kbl(caption = "Suitable Oyster Aquaculture areas on the West Coast based Exclusive Economic Zones (EEZ).") |>
   kable_styling()
 ```
 
-# Potential aquaculture locations
+# Potential aquaculture locations for different species
 
 ```{r}
 #| label: potential aquaculture location function
@@ -430,7 +437,7 @@ spec_area_eez <- spec_area_eez |>
 tm_basemap("Esri.OceanBasemap") +
 tm_shape(spec_area_eez) +
   tm_polygons(fill = "spec_area",
-              fill.legend = tm_legend("Suitable Aquaculture Area")) +
+              fill.legend = tm_legend("Suitable Aquaculture Area (km^2)")) +
   tm_text("rgn", size = 0.7) +
   tm_shape(eez_oysters) + 
   tm_raster(col.scale = tm_scale_categorical(labels = (c("Suitable Areas", "Unsuitable")),
@@ -438,7 +445,8 @@ tm_shape(spec_area_eez) +
             col.legend = tm_legend("Aquaculture Areas")) + 
   tm_compass() +
   tm_scalebar() +
-  tm_title("Exclusive Economic Zones shaded by Suitable Oyster Aquaculture Area ") +
+  tm_title( paste("Suitable Aquaculture Area in Exclusive Economic Zones (EEZ): ", species_name), 
+           size = 2) +
   tm_layout(fontsize = 2,
             scale = 0.5,
             compass.position = tm_pos_in("left", "bottom"),
@@ -453,7 +461,11 @@ potent_aqu(sst, eez_sf, depth, 6.75, 13.02, -125, 0, "Mesocentrotus franciscanus
 ```
 
 # References 
-```{r}
 
-```
+Gentry, R. R., Froehlich, H. E., Grimm, D., Kareiva, P., Parke, M., Rust, M., Gaines, S. D., & Halpern, B. S. Mapping the global potential for marine aquaculture. Nature Ecology & Evolution, 1, 1317-1324 (2017).
 
+GEBCO Compilation Group (2022) GEBCO_2022 Grid (doi:10.5285/e0f0bb80-ab44-2739-e053-6c86abc0289c).
+
+Hall, S. J., Delaporte, A., Phillips, M. J., Beveridge, M. & O’Keefe, M. Blue Frontiers: Managing the Environmental Costs of Aquaculture (The WorldFish Center, Penang, Malaysia, 2011).
+
+Palomares, M.L.D. and D. Pauly. Editors. 2025. SeaLifeBase. World Wide Web electronic publication. www.sealifebase.org, version (04/2025).
