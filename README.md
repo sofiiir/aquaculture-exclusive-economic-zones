@@ -9,7 +9,7 @@ Aquaculture is a viable solution to help address over-fishing while providing oc
 
 -**Data download:** Data used in this analysis can be accessed and downloaded from a Google Drive here: [Data Google Drive]((https://drive.google.com/file/d/1u-iwnPDbe6ZK7wSFVMI-PpCKaRQ3RVmg/view)). The data is all publicly available as denoted below. 
 
--**Sea Surface Temperature (SST) Data:** SST data was acquired from the [NOAA’s 5km Daily Global Satellite Sea Surface Temperature Anomaly v3.1.](https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta.php). It is publicly available. 
+-**Sea Surface Temperature (SST) Data:** SST data was acquired from the [NOAA’s 5km Daily Global Satellite Sea Surface Temperature Anomaly v3.1](https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta.php). It is publicly available. 
 
 -**Bathymetry Data:** Bathymetry data is available through the [General Bathymetric Chart of the Oceans (GEBCO)](https://www.gebco.net/data-products/gridded-bathymetry-data#area). It is publicly available.
 
